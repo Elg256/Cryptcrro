@@ -5,7 +5,10 @@ This librairie provide ecdsa signature, ecies encryption (using AES from the cry
 It is the librairie used both in CrroChat and in CrroCoin and will be use in the Crro software at the end.
 
 
-For using It here a little exemple:
+
+
+
+For using It here a little example:
 
 #import
 from cryptcrro.asymetric import crro
