@@ -15,8 +15,6 @@ class crro:
     @staticmethod
     def encrypt(key, message: bytes, padding = True):
 
-        print("message encode",message)
-
         if padding == False:
             encrypted_message = encrypt_without_padding(key, message)
             

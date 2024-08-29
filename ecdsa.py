@@ -1,5 +1,3 @@
-from cryptography.fernet import Fernet
-
 import secrets
 
 import base64
@@ -24,7 +22,7 @@ from cryptcrro.secp256k1 import point_multiply , n ,gx ,gy ,point_addition
 #print(y_int)
 
 def hashing_message_int(message):
-    hash = int(hashlib.sha256(message.encode('utf-8')).hexdigest(), 16)
+    hash = int(hashlib.sha256(message).hexdigest(), 16)
 
     return hash
 
@@ -32,7 +30,7 @@ def verification_signature(public_key,signature,message):
 
     x_signature, y_signature = signature
 
-    hash_int = hashing_message_int(message)
+    hash_int = hashing_message_int(message.encode())
 
     y_signature = int(y_signature)
 

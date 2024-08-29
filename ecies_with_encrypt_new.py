@@ -33,7 +33,7 @@ def encrypt_aes256(symetric_key ,message):
 
     fernet = Fernet(fernet_key)
 
-    encrypted_message = fernet.encrypt(message.encode())
+    encrypted_message = fernet.encrypt(message)
 
     return encrypted_message
 
@@ -71,7 +71,6 @@ def encrypt_message(public_key, message):
 
 def decrypt_message(private_key, encrypted_message):
 
-
     start_marker = "---BEGIN CRRO MESSAGE---"
     end_marker = "---END CRRO MESSAGE---"
     if start_marker in encrypted_message and end_marker in encrypted_message:
@@ -79,12 +78,9 @@ def decrypt_message(private_key, encrypted_message):
         end_index = encrypted_message.index(end_marker)
         encrypted_message = encrypted_message[start_index:end_index].strip()
 
-
     # Extraire la clé et le message chiffré
     start_marker = "---BEGIN CURVE INT---"
     end_marker = "---END CURVE INT---"
-
-
 
     if start_marker not in encrypted_message or end_marker not in encrypted_message:
         print("Here Error, Missing CRUVE INT key in ciphertext, or missing private key.")
@@ -96,14 +92,12 @@ def decrypt_message(private_key, encrypted_message):
     cle_hex = encrypted_message[start_index:end_index].strip()
     random_int_on_curve = cle_hex.replace(" ", "").replace("\n", "")
 
-    random_int_on_curve = base64.b64decode(random_int_on_curve).decode()
+    random_int_on_curve = base64.urlsafe_b64decode(random_int_on_curve)
 
-    random_int_on_curve = random_int_on_curve.replace(" ", "").replace("(", "").replace(")",
-                                                                                        "").split(
-        ",")
+    x = int.from_bytes(random_int_on_curve[:32])
+    y = int.from_bytes(random_int_on_curve[32:])
 
-    random_int_on_curve = tuple(
-        int(random_int_on_curve) for random_int_on_curve in random_int_on_curve)
+    random_int_on_curve = x, y
 
     message_hex = encrypted_message[end_index + len(end_marker):].strip()
     message_hex = message_hex.replace(" ", "").replace("\n", "")
@@ -111,9 +105,7 @@ def decrypt_message(private_key, encrypted_message):
     encrypted_message = encrypted_message[end_index + len(end_marker):].strip()
     # message_hex = base64.b64decode(message_base64).hex()
 
-
     encrypted_message.encode('utf-8')
-
 
     shared_secret = point_multiply(private_key,random_int_on_curve)
 

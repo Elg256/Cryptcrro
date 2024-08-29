@@ -128,11 +128,7 @@ def encrypt(key, message:bytes):
 
         iv_with_count = iv_int + (i+1) # by using sha256 instead of aes we don't need a counter that is x bits longs
 
-        print("iv_with_count", iv_with_count)
-
         iv_with_count = hex(int(iv_with_count))[2:]
-
-        print("iv_with_count",iv_with_count )
 
         #print("iv_with_count", i , iv_with_count)
 
@@ -315,11 +311,7 @@ def decrypt_without_padding(key, message:bytes):
     for i in range(0, len(message_blocks)):
         iv_with_count = iv_int + (i + 1)  # by using sha256 instead of aes we don't need a counter that is x bits longs
 
-        print("iv_with_count", iv_with_count)
-
         iv_with_count = hex(int(iv_with_count))[2:]
-
-        print("iv_with_count", iv_with_count)
 
         key_and_iv = bytes.fromhex(iv_with_count) + key
 
