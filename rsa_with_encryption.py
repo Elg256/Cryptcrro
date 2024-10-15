@@ -16,6 +16,12 @@ generator_point = gx , gy
 
 e = 65537
 
+
+def hashing_message_int(message):
+    hash = int(hashlib.sha256(message).hexdigest(), 16)
+
+    return hash
+
 def generate_keys(key_size=2048):
 
     while True:
@@ -65,17 +71,10 @@ def encrypt_message(public_key, message):
     symetric_key = base64.urlsafe_b64encode(os.urandom(32))
 
     symetric_key_str = str(base64.urlsafe_b64encode(symetric_key)).encode()
-
-    print("symetric_key", symetric_key)
-
     int_symetric_key = int.from_bytes(symetric_key, byteorder='big')
     #random_int = secrets.randbelow(n-1) + 1
-    print("int symetric_key", int_symetric_key)
 
     encrypted_key = pow(int_symetric_key, e, n) #(int_symetric_key ** e) % n
-
-    print("encrypted_key", encrypted_key)
-
     encrypted_key = base64.urlsafe_b64encode((encrypted_key.to_bytes((encrypted_key.bit_length() + 7) //8, byteorder='big'))).decode()
  
     encrypted_message = encrypt_aes256(symetric_key ,message)
@@ -100,7 +99,7 @@ def decrypt_message(private_key, encrypted_message):
 
 
     if start_marker not in encrypted_message or end_marker not in encrypted_message:
-        print("Error, Missing AES key in ciphertext, or missing private key.")
+        raise ValueError("Missing AES key in ciphertext or missing private key.")
 
         return
 
@@ -119,18 +118,38 @@ def decrypt_message(private_key, encrypted_message):
 
     #encrypted_message.encode('utf-8')
 
-    print("symetric_key_encrypted", symetric_key_encrypted)
-
     symetric_key_encrypted_int = base64.urlsafe_b64decode(symetric_key_encrypted)
 
-    print("symetric_key_encrypted_int",symetric_key_encrypted_int)
-    symetric_key = pow(int.from_bytes(symetric_key_encrypted_int), d , n)
-
-    print("symetric_key", symetric_key)
+    symetric_key = pow(int.from_bytes(symetric_key_encrypted_int), d , n)  # need to de a blind decryption
 
     symetric_key = symetric_key.to_bytes(symetric_key.bit_length() + 7 // 8, byteorder='big')
 
     decrypted_message = decrypt_aes256(symetric_key,encrypted_message)
 
-    return decrypted_message.decode()
+    return decrypted_message
 
+
+def sign(private_key:tuple, message:bytes):
+    d, n = private_key
+
+    hash_message_int = hashing_message_int(message)
+
+    encrypted_hash = pow(hash_message_int, d, n)  # (int_symetric_key ** e) % n
+
+    encrypted_hash = base64.urlsafe_b64encode(
+        (encrypted_hash.to_bytes((encrypted_hash.bit_length() + 7) // 8, byteorder='big'))).decode()
+
+    return encrypted_hash
+
+def check_sig(public_key, signature, message):
+
+    e, n = public_key
+
+    hash_message_int = hashing_message_int(message.encode())
+
+    decrypt_sig = pow(int.from_bytes(base64.urlsafe_b64decode(signature)), e, n)
+
+    if hash_message_int == decrypt_sig:
+        return True
+    else:
+        return False

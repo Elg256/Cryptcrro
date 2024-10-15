@@ -61,7 +61,6 @@ def encrypt_message(public_key, message):
     gx_shared, gy_shared = shared_secret
     gx_shared = str(gx_shared)
 
-
     symetric_key = hashlib.sha256(gx_shared.encode('utf-8')).hexdigest()
 
     encrypted_message = encrypt_aes256(symetric_key ,message)
@@ -83,9 +82,7 @@ def decrypt_message(private_key, encrypted_message):
     end_marker = "---END CURVE INT---"
 
     if start_marker not in encrypted_message or end_marker not in encrypted_message:
-        print("Here Error, Missing CRUVE INT key in ciphertext, or missing private key.")
-
-        return
+        raise ValueError("Here Error, Missing CRUVE INT key in ciphertext, or missing private key.")
 
     start_index = encrypted_message.index(start_marker) + len(start_marker)
     end_index = encrypted_message.index(end_marker)
@@ -103,7 +100,6 @@ def decrypt_message(private_key, encrypted_message):
     message_hex = message_hex.replace(" ", "").replace("\n", "")
 
     encrypted_message = encrypted_message[end_index + len(end_marker):].strip()
-    # message_hex = base64.b64decode(message_base64).hex()
 
     encrypted_message.encode('utf-8')
 
@@ -117,22 +113,3 @@ def decrypt_message(private_key, encrypted_message):
     decrypted_message = decrypt_aes256(symetric_key,encrypted_message)
 
     return decrypted_message
-
-'''
-private_key = generate_private_key()
-
-public_key = generate_public_key(private_key)
-
-message = "Hello world"
-
-encrypt_message = encrypt_message(public_key, message)
-
-print("end" ,encrypt_message)
-
-decrypted_message = decrypt_message(private_key, encrypt_message)
-
-print(decrypted_message)
-
-'''
-
-

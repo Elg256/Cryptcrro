@@ -6,14 +6,14 @@ import base64
 class crro:
 
     @staticmethod
-    def generate_key():
+    def generate_key() -> bytes:
         key = generate_key()
 
         return key
 
 
     @staticmethod
-    def encrypt(key, message: bytes, padding = True):
+    def encrypt(key, message: bytes, padding = True) -> bytes:
 
         if padding == False:
             encrypted_message = encrypt_without_padding(key, message)
@@ -26,7 +26,7 @@ class crro:
 
 
     @staticmethod
-    def decrypt(key, encrypted_message, padding = True):
+    def decrypt(key, encrypted_message, padding = True) -> bytes:
 
         encrypted_message = base64.urlsafe_b64decode(encrypted_message)
 
@@ -38,4 +38,3 @@ class crro:
             decrypted_message = decrypt(key, encrypted_message)
 
         return decrypted_message
-

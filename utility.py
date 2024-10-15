@@ -41,6 +41,13 @@ def add_sign_tags(signature, message):
     signed_message = f"---BEGIN SIGNED CRRO MESSAGE---\n{message.decode()}\n{signature_with_tags}\n---END SIGNED CRRO MESSAGE---"
     return signed_message
 
+def add_sign_tags_rsa(signature:str, message:bytes):
+
+    signature = f"---Start Signature---\n{signature}\n---End Signature---"
+    signature_with_tags = insert_newlines_with_tags(signature, 64)
+    signed_message = f"---BEGIN SIGNED CRRO MESSAGE---\n{message.decode()}\n{signature_with_tags}\n---END SIGNED CRRO MESSAGE---"
+    return signed_message
+
 def add_encrypt_tags_old(random_int_on_curve, encrypted_message):
 
     random_int_on_curve = ''.join(str(random_int_on_curve)).encode('utf-8')
@@ -117,6 +124,18 @@ def add_encrypt_and_sign_tags(random_int_on_curve,signature, encrypted_message):
 
     return encrypted_message_with_tags
 
+def add_encrypt_and_sign_tags_rsa(encrypted_key, signature, encrypted_message):
+    encrypted_message = encrypted_message.decode('utf-8')
+
+    encrypted_message_with_tags = f"---Start Signature---\n{signature}\n---End Signature---\n" \
+                     f"---Start AES key---\n{encrypted_key}\n---End AES key---\n{encrypted_message}"
+
+    encrypted_message_with_tags = f"---BEGIN CRRO MESSAGE---\n{encrypted_message_with_tags}\n---END CRRO MESSAGE---"
+
+    encrypted_message_with_tags = insert_newlines_with_tags(encrypted_message_with_tags, 64)
+
+    return encrypted_message_with_tags
+
 
 def extract_signature(message):
 
@@ -144,11 +163,9 @@ def extract_message_and_signature(signed_message):
     start_marker = "---BEGIN SIGNED CRRO MESSAGE---"
     end_marker = "---Start Signature---"
     if start_marker in signed_message and end_marker in signed_message:
-        start_index = signed_message.index(start_marker) + len(start_marker)  #I not sure but I had *2 and it work
+        start_index = signed_message.index(start_marker) + len(start_marker)
         end_index = signed_message.index(end_marker)
         message = signed_message[start_index:end_index].strip()
-
-    #print("message message", message)
 
     start_marker = "---Start Signature---"
     end_marker = "---End Signature---"
@@ -165,6 +182,27 @@ def extract_message_and_signature(signed_message):
     signature_y = int.from_bytes(signature[32:])
 
     signature = signature_x, signature_y
+
+    return signature, message
+
+def extract_message_and_signature_rsa(signed_message):
+
+    start_marker = "---BEGIN SIGNED CRRO MESSAGE---"
+    end_marker = "---Start Signature---"
+    if start_marker in signed_message and end_marker in signed_message:
+        start_index = signed_message.index(start_marker) + len(start_marker)  #I not sure but I had *2 and it work
+        end_index = signed_message.index(end_marker)
+        message = signed_message[start_index:end_index].strip()
+
+    #print("message message", message)
+
+    start_marker = "---Start Signature---"
+    end_marker = "---End Signature---"
+
+    start_index = signed_message.index(start_marker) + len(start_marker)
+    end_index = signed_message.index(end_marker)
+    cle_sign = signed_message[start_index:end_index].strip()
+    signature = cle_sign.replace(" ", "").replace("\n", "")
 
     return signature, message
 
