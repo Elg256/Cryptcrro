@@ -1,29 +1,32 @@
-# Cryptcrro
-A cryptography librairie 
+Cryptcrro
+=================
 
-This librairie provide ecdsa signature, ecies encryption (using AES from the cryptography librairie for symetric encryption) using Secp256k1 curve. The librairie also provide a symmetric encryption that I call sha256_CTR it is basically a CTR encyprtion mode but using Sha256 instead of AES. (I know it seems weird, but if you are perplexed about encryption with a hashing function pls check the code)
-It is the librairie used both in CrroChat and in CrroCoin and will be use in the Crro software at the end.
+``Cryptcrro`` is an application for encrypting and signing messages. It is the official GUI for the cryptcrro library.
+
+``Cryptcrro`` includes both asymetric and symetric encryption, for encryption the protocols is asymetric ECIES + AES-128 or RSA + AES-128, for signing the protocols is ECDSA or RSA.
+
+All Elliptic curve operation is done with the Secp256k1 curve.
+
+``Cryptcrro`` also provide a symmetric encryption called sha256_CTR, it is basically a AES-CTR encryption mode but using Sha256 instead of AES. (I know it seems weird, but if you are perplexed about encryption with a hashing function pls check the code).
 
 
+ For example, symetric encryption can be done like that:
 
+.. code-block:: pycon
 
+    >>> from cryptcrro.symetric import crro as scrro
+    >>> key = scrro.generate_key()
+    >>> plaintext = "Chancellor on brink of second bailout for banks"
+    >>> ciphertext = scrro.encrypt(key, message)
+    >>> decrypted_ciphertext = scrro.decrypt(key, ciphertext)
 
-For using It here a little example:
+ Or, asymetric encryption
 
-#import
-from cryptcrro.asymetric import crro
+.. code-block:: pycon
 
-#generate keys
-private_key = crro.generate_private_key()
-public_key = crro.generate_public_key(private_key)
-
-#message
-message = "Chancellor on brink of second bailout for banks"
-
-#encryption
-encrypted_message = crro.encrypt(public_key, message)
-print(encrypted_message)
-
-#decryption
-decrypt_message = crro.decrypt(private_key, encrypted_message)
-print(decrypt_message.decode())
+    >>> import from cryptcrro.asymetric import crro
+    >>> private_key = crro.generate_private_key()
+    >>> public_key = crro.generate_public_key(private_key)
+    >>> plaintext = "Chancellor on brink of second bailout for banks"
+    >>> ciphertext = crro.encrypt(public_key, message) 
+    >>> decrypted_ciphertext = crro.decrypt(private_key, encrypted_message) 
