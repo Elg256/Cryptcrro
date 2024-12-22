@@ -1,7 +1,7 @@
 Cryptcrro
 =================
 
-``Cryptcrro`` is an application for encrypting and signing messages. It is the official GUI for the cryptcrro library.
+``Cryptcrro`` is a python cryptography library.
 
 ``Cryptcrro`` includes both asymetric and symetric encryption, for encryption the protocols is asymetric ECIES + AES-128 or RSA + AES-128, for signing the protocols is ECDSA or RSA.
 
@@ -15,14 +15,10 @@ For example, symetric encryption can be done like that:
 .. code-block:: pycon
 
     >>> from cryptcrro.symetric import crro 
-    >>> # Put this somewhere safe!
-    >>> key = Fernet.generate_key()
-    >>> f = Fernet(key)
-    >>> token = f.encrypt(b"A really secret message. Not for prying eyes.")
-    >>> token
-    b'...'
-    >>> f.decrypt(token)
-    b'A really secret message. Not for prying eyes.'
+    >>> plaintext = "Chancellor on brink of second bailout for banks"
+    >>> key = scrro.generate_key()
+    >>> ciphertext = scrro.encrypt(key, message)
+    >>> decrypted_ciphertext = scrro.decrypt(key, ciphertext)
 
 Or, asymetric encryption
 
