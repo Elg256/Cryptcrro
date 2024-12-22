@@ -10,7 +10,7 @@ All Elliptic curve operation is done with the Secp256k1 curve.
 ``Cryptcrro`` also provide a symmetric encryption called sha256_CTR, it is basically a AES-CTR encryption mode but using Sha256 instead of AES. (I know it seems weird, but if you are perplexed about encryption with a hashing function pls check the code).
 
 
- For example, symetric encryption can be done like that:
+For example, symetric encryption can be done like that:
 
 .. code-block:: pycon
 
@@ -24,13 +24,13 @@ All Elliptic curve operation is done with the Secp256k1 curve.
     >>> f.decrypt(token)
     b'A really secret message. Not for prying eyes.'
 
- Or, asymetric encryption
+Or, asymetric encryption
 
 .. code-block:: pycon
 
-    >>>import from cryptcrro.asymetric import crro
-    >>>private_key = crro.generate_private_key()
-    >>>public_key = crro.generate_public_key(private_key)
-    >>>plaintext = "Chancellor on brink of second bailout for banks"
-    >>>ciphertext = crro.encrypt(public_key, message) 
-    >>>decrypted_ciphertext = crro.decrypt(private_key, encrypted_message) 
+    >>> import from cryptcrro.asymetric import crro
+    >>> private_key = crro.generate_private_key()
+    >>> public_key = crro.generate_public_key(private_key)
+    >>> plaintext = "Chancellor on brink of second bailout for banks"
+    >>> ciphertext = crro.encrypt(public_key, message) 
+    >>> decrypted_ciphertext = crro.decrypt(private_key, encrypted_message) 
