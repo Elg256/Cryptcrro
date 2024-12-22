@@ -24,7 +24,7 @@ Or, asymetric encryption
 
 .. code-block:: pycon
 
-    >>> import from cryptcrro.asymetric import crro
+    >>> from cryptcrro.asymetric import crro
     >>> private_key = crro.generate_private_key()
     >>> public_key = crro.generate_public_key(private_key)
     >>> plaintext = "Chancellor on brink of second bailout for banks"
