@@ -20,7 +20,7 @@ For example, symetric encryption can be done like that:
     >>> ciphertext = scrro.encrypt(key, message)
     >>> decrypted_ciphertext = scrro.decrypt(key, ciphertext)
 
-Or, asymetric encryption
+Or, asymetric encryption:
 
 .. code-block:: pycon
 
