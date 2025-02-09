@@ -1,8 +1,11 @@
+import os
+
 from cryptcrro.asymetric import crro
 from cryptcrro.asymetric import rsa
 from cryptcrro.symetric import crro as scrro
 import time
 
+from cryptcrro.symetric import Sha256_Ctr
 
 message = b"""Information can leak from a system through measurement of the time it takes to respond to certain queries. How much this information can help an attacker depends on many variables: cryptographic system design, the CPU running the system, the algorithms used, assorted implementation details, timing attack countermeasures, the accuracy of the timing measurements, etc. Timing attacks can be applied to any algorithm that has data-dependent timing variation. Removing timing-dependencies is difficult in some algorithms that use low-level operations that frequently exhibit varied execution time."""
 
@@ -22,7 +25,7 @@ else:
 
 start_time = time.time()
 ciphertext = crro.sign(private_key, message)
-t_f_sign, text = crro.verify_signature(pk, ciphertext)
+t_f_sign, text = crro.check_signature(pk, ciphertext)
 
 if text == message.decode().strip() and t_f_sign == True:
     print(f"crro.sign/verif                  Ok  {time.time() - start_time}")
@@ -34,7 +37,7 @@ elif text != message.decode().strip():
 
 start_time = time.time()
 ciphertext = crro.sign_and_encrypt(private_key, pk, message)
-t_f_sign, text = crro.decrypt_and_verify_signature(private_key,pk, ciphertext)
+t_f_sign, text = crro.decrypt_and_check_signature(private_key,pk, ciphertext)
 
 
 if text == message.decode().strip() and t_f_sign == True:
@@ -62,7 +65,7 @@ else:
 
 start_time = time.time()
 ciphertext = rsa.sign(private_key, message)
-t_f_sign, text = rsa.verify_signature(pk, ciphertext)
+t_f_sign, text = rsa.check_signature(pk, ciphertext)
 
 if text == message.decode().strip() and t_f_sign == True:
     print(f"rsa.sign/verif                   Ok  {time.time() - start_time}")
@@ -71,7 +74,7 @@ else:
 
 start_time = time.time()
 ciphertext = rsa.sign_and_encrypt(private_key, pk, message)
-t_f_sign, text = rsa.decrypt_and_verify_signature(private_key,pk, ciphertext)
+t_f_sign, text = rsa.decrypt_and_check_signature(private_key,pk, ciphertext)
 
 if text == message.decode().strip() and t_f_sign == True:
     print(f"rsa.sign_encrypt/decrypt_verify  Ok  {time.time() - start_time}")
@@ -89,3 +92,15 @@ if text == message:
     print(f"scrro.encrypt/decrypt            Ok  {time.time() - start_time}")
 else:
     print(f"scrro.encrypt/decrypt            Failed")
+
+
+key = Sha256_Ctr.generate_key()
+start_time = time.time()
+ciphertext = Sha256_Ctr.encrypt(key, message)
+
+text = Sha256_Ctr.decrypt(key, ciphertext)
+
+if text == message:
+    print(f"Sha256_Ctr.encrypt/decrypt       Ok  {time.time() - start_time}")
+else:
+    print(f"Sha256_Ctr.encrypt/decrypt       Failed")
