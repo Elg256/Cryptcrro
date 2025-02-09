@@ -10,7 +10,6 @@ mod ecies;
 fn rust_cryptcrro(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(aes_ctr::aes256_ctr_encrypt, m)?)?;
     m.add_function(wrap_pyfunction!(aes_ctr::aes256_ctr_decrypt, m)?)?;
-
     m.add_function(wrap_pyfunction!(secp256k1::generate_private_key, m)?)?;
     m.add_function(wrap_pyfunction!(secp256k1::generate_public_key, m)?)?;
     m.add_function(wrap_pyfunction!(ecdsa::create_ecdsa_sig, m)?)?;
