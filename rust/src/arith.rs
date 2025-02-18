@@ -8,7 +8,7 @@ pub fn modinv(n: &BigInt, p: &BigInt) -> BigInt {
     let (mut a, mut m, mut x, mut inv) = (n.clone(), p.clone(), BigInt::zero(), BigInt::one());
 
 
-    while a < BigInt::zero() { a += p } // may be put after the while
+    while a < BigInt::zero() { a += p }
 
     while a > BigInt::one() {
         let div = &a / &m;
