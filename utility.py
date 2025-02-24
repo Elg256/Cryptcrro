@@ -1,6 +1,5 @@
 import base64
 
-from cryptcrro.secp256k1 import p
 
 def insert_newlines_with_tags(s, every):
     parts = s.split('\n') 
@@ -182,7 +181,7 @@ def extract_message_and_signature_rsa(signed_message):
     start_marker = "---BEGIN SIGNED CRRO MESSAGE---"
     end_marker = "---Start Signature---"
     if start_marker in signed_message and end_marker in signed_message:
-        start_index = signed_message.index(start_marker) + len(start_marker)  #I not sure but I had *2 and it work
+        start_index = signed_message.index(start_marker) + len(start_marker)
         end_index = signed_message.index(end_marker)
         message = signed_message[start_index:end_index].strip()
 
@@ -289,6 +288,7 @@ def make_base32_addr(pubkey:tuple):
 
 
 def uncompress_base58_public_key(compressed_key):
+    from cryptcrro.secp256k1 import p
     if compressed_key.startswith("tc2"):
 
         compressed_key_without_prefix = compressed_key[3:]
@@ -316,6 +316,7 @@ def uncompress_base58_public_key(compressed_key):
     return public_key
 
 def uncompress_base32_public_key(compressed_key):
+    from cryptcrro.secp256k1 import p
     if compressed_key.startswith("tc2"):
 
         compressed_key_without_prefix = compressed_key[3:]
