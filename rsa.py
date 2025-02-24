@@ -1,16 +1,14 @@
-
-from cryptography.fernet import Fernet
-
 import os
 import base64
-import sympy
-
 import random
 import hashlib
 
 from cryptcrro.utility import insert_newlines_with_tags
-
 from cryptcrro.secp256k1 import gx, gy
+from cryptcrro.arith import next_prime
+
+import rust_cryptcrro
+
 
 generator_point = gx , gy
 
@@ -25,8 +23,8 @@ def hashing_message_int(message):
 def generate_keys(key_size=2048):
 
     while True:
-        p = sympy.nextprime(int.from_bytes(os.urandom(key_size // 2  // 8), byteorder='big'))
-        q = sympy.nextprime(int.from_bytes(os.urandom(key_size // 2 // 8), byteorder='big'))
+        p = next_prime(int.from_bytes(os.urandom(key_size // 2  // 8), byteorder='big'))
+        q = next_prime(int.from_bytes(os.urandom(key_size // 2 // 8), byteorder='big'))
 
         if p != q:
             break
@@ -42,42 +40,24 @@ def generate_keys(key_size=2048):
     return private_key, public_key
 
 
-def encrypt_aes256(symetric_key ,message):
-
-    fernet = Fernet(symetric_key)
-
-    encrypted_message = fernet.encrypt(message)
-
-    return encrypted_message
-
+def encrypt_aes256(symetric_key, message):
+    return bytes.fromhex(rust_cryptcrro.aes256_ctr_encrypt(symetric_key, message.hex()))
 
 def decrypt_aes256(symetric_key, encrypted_message):
-
-    #fernet_key = base64.urlsafe_b64encode(str(symetric_key).encode())
-    fernet_key = symetric_key
-    #fernet_key = base64.urlsafe_b64encode(symetric_key.to_bytes(32, byteorder='big'))
-    #fernet_key = base64.urlsafe_b64decode(symetric_key)
-    fernet = Fernet(fernet_key)
-
-    decrypted_message = fernet.decrypt(encrypted_message)
-
-    return decrypted_message
-
+    return bytes.fromhex(rust_cryptcrro.aes256_ctr_decrypt(symetric_key,
+                                                           base64.urlsafe_b64decode(encrypted_message).hex()))
 
 def encrypt_message(public_key, message):
 
     e,n = public_key
-    #symetric_key = os.urandom(32)
-    symetric_key = base64.urlsafe_b64encode(os.urandom(32))
+    symetric_key = os.urandom(32)
 
-    symetric_key_str = str(base64.urlsafe_b64encode(symetric_key)).encode()
     int_symetric_key = int.from_bytes(symetric_key, byteorder='big')
-    #random_int = secrets.randbelow(n-1) + 1
 
-    encrypted_key = pow(int_symetric_key, e, n) #(int_symetric_key ** e) % n
+    encrypted_key = pow(int_symetric_key, e, n)
     encrypted_key = base64.urlsafe_b64encode((encrypted_key.to_bytes((encrypted_key.bit_length() + 7) //8, byteorder='big'))).decode()
  
-    encrypted_message = encrypt_aes256(symetric_key ,message)
+    encrypted_message = base64.urlsafe_b64encode(encrypt_aes256(symetric_key.hex() ,message))
 
     return encrypted_key, encrypted_message
 
@@ -107,23 +87,18 @@ def decrypt_message(private_key, encrypted_message):
     symetric_key_encrypted = encrypted_message[start_index:end_index].strip()
     symetric_key_encrypted = symetric_key_encrypted.replace(" ", "").replace("\n", "")
 
-    #symetric_key_encrypted = base64.urlsafe_b64decode(symetric_key_encrypted)
-
     message = encrypted_message[end_index + len(end_marker):].strip()
     message = message.replace(" ", "").replace("\n", "")
 
     encrypted_message = encrypted_message[end_index + len(end_marker):].strip()
-    # message_hex = base64.b64decode(message_base64).hex()
-
-    #encrypted_message.encode('utf-8')
 
     symetric_key_encrypted_int = base64.urlsafe_b64decode(symetric_key_encrypted)
 
     symetric_key = pow(int.from_bytes(symetric_key_encrypted_int), d , n)  # need to de a blind decryption
 
-    symetric_key = symetric_key.to_bytes(symetric_key.bit_length() + 7 // 8, byteorder='big')
+    symetric_key = symetric_key.to_bytes(32, byteorder='big')
 
-    decrypted_message = decrypt_aes256(symetric_key,encrypted_message)
+    decrypted_message = decrypt_aes256(symetric_key.hex(), encrypted_message)
 
     return decrypted_message
 
