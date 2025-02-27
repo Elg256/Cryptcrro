@@ -66,7 +66,7 @@ class crro:
         if isinstance(encrypted_message, bytes):
             encrypted_message = encrypted_message.decode()
         assert isinstance(public_key, tuple), f"CRRO public key need to be tuple[int, int] not {type(public_key).__name__}"
-        assert isinstance(encrypted_message, bytes), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
+        assert isinstance(encrypted_message, str), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
         assert isinstance(private_key, int), f"Private key  need to be int not {type(private_key).__name__}"
 
         decrypted_message = ecies.decrypt_message(private_key, encrypted_message)
@@ -85,7 +85,7 @@ class crro:
     def decrypt(private_key:int, encrypted_message:str) -> bytes:
         if isinstance(encrypted_message, bytes):
             encrypted_message = encrypted_message.decode()
-        assert isinstance(encrypted_message, bytes), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
+        assert isinstance(encrypted_message, str), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
         assert isinstance(private_key, int), f"Private key  need to be int not {type(private_keyy).__name__}"
 
         decrypted_message = ecies.decrypt_message(private_key, encrypted_message)
@@ -97,7 +97,7 @@ class crro:
         if isinstance(signed_message, bytes):
             signed_message = signed_message.decode()
         assert isinstance(public_key, tuple), f"CRRO public key need to be tuple[int, int] not {type(public_key).__name__}"
-        assert isinstance(signed_message, bytes), f"Signed_message need to be bytes or str not {type(signed_message).__name__}"
+        assert isinstance(signed_message, str), f"Signed_message need to be bytes or str not {type(signed_message).__name__}"
 
         signature, message = extract_message_and_signature(signed_message)
 
@@ -151,8 +151,8 @@ class rsa:
         assert isinstance(public_key,
                           tuple), f"CRRO public key need to be tuple[int, int] not {type(public_key).__name__}"
         assert isinstance(message, bytes), f"Plaintext need to be bytes or str not {type(message).__name__}"
-        assert isinstance(private_key, int), f"Private key  need to be tuple[int, int] not {type(private_key).__name__}"
-        
+        assert isinstance(private_key, tuple), f"Private key  need to be tuple[int, int] not {type(private_key).__name__}"
+
         signature = crro_rsa.sign(private_key, message.strip())
         signed_message = add_sign_tags_rsa(signature, message.strip())
 
@@ -166,7 +166,7 @@ class rsa:
     def decrypt(private_key:tuple, encrypted_message:str) -> bytes:
         if isinstance(encrypted_message, bytes):
             encrypted_message = encrypted_message.decode()
-        assert isinstance(encrypted_message, bytes), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
+        assert isinstance(encrypted_message, str), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
         assert isinstance(private_key, tuple), f"Private key  need to be tuple[int, int] not {type(private_keyy).__name__}"
 
         decrypted_message = crro_rsa.decrypt_message(private_key, encrypted_message)
@@ -178,7 +178,7 @@ class rsa:
         if isinstance(signed_message, bytes):
             signed_message = signed_message.decode()
         assert isinstance(public_key, tuple), f"CRRO public key need to be tuple[int, int] not {type(public_key).__name__}"
-        assert isinstance(signed_message, bytes), f"Signed_message need to be bytes or str not {type(signed_message).__name__}"
+        assert isinstance(signed_message, str), f"Signed_message need to be bytes or str not {type(signed_message).__name__}"
 
         signature, message = extract_message_and_signature_rsa(signed_message.strip())
 
@@ -191,7 +191,7 @@ class rsa:
         if isinstance(encrypted_message, bytes):
             encrypted_message = encrypted_message.decode()
         assert isinstance(public_key, tuple), f"CRRO public key need to be tuple[int, int] not {type(public_key).__name__}"
-        assert isinstance(encrypted_message, bytes), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
+        assert isinstance(encrypted_message, str), f"Ciphertext need to be bytes or str not {type(encrypted_message).__name__}"
         assert isinstance(private_key, tuple), f"Private key  need to be tuple[int, int] not {type(private_key).__name__}"
 
         signed_message = crro_rsa.decrypt_message(private_key, encrypted_message).decode()
