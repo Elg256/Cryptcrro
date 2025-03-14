@@ -107,13 +107,6 @@ fn u8_to_u32_array_le(bytes: [u8; 32]) -> [u32; 8] {
     result
 }
 
-fn array_to_hex_string(array: [[u8; 4]; 4]) -> String {
-    array
-        .iter()
-        .flat_map(|row| row.iter())
-        .map(|byte| format!("{:02x}", byte))
-        .collect()
-}
 
 #[pyfunction]
 pub fn chacha20_encrypt(key: &[u8], plaintext: &[u8]) -> Vec<u8> {
