@@ -21,8 +21,6 @@ fn _encrypt(key: [u32; 8], nonce: [u32; 2],  mut plaintext: &[u8]) -> Vec<u8> {
     let mut ctr= 0u64;
     let mut keystream;
 
-
-
     for i in 0..num_blocks {
         keystream = chacha20_block(key, ctr, nonce);
 
@@ -75,14 +73,14 @@ fn chacha20_block(key: [u32; 8], ctr: u64, nonce: [u32; 2]) -> [u8; 64] {
     for i in 0..16 {
         keystream[(4 * i)..(4 * i + 4)].copy_from_slice(&state[i].wrapping_add(x[i]).to_le_bytes());
     }
-
-
+    
     return keystream;
 }
 
 fn u64_to_u32_pair_le(value: u64) -> [u32; 2] {
     [(value & 0xFFFFFFFF) as u32, (value >> 32) as u32]
 }
+
 
 fn quarter_round(x: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize) {
     x[a] = x[a].wrapping_add(x[b]);  x[d] ^= x[a];  x[d] = x[d].rotate_left(16);
@@ -92,12 +90,12 @@ fn quarter_round(x: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize) {
 }
 
 
-
 fn generate_key() -> [u8; 32] {
     let mut key = [0u8; 32];
     OsRng.fill_bytes(&mut key);
     key
 }
+
 
 fn u8_to_u32_array_le(bytes: [u8; 32]) -> [u32; 8] {
     let mut result = [0u32; 8];
