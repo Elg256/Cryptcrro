@@ -3,12 +3,12 @@ Cryptcrro
 
 ``Cryptcrro`` is a python cryptographc library.
 
-   You can install it with::
+You can install it with::
 
-       pip install cryptcrro
+       pip install pycryptodome
 
-   In this case, all modules are installed under the ``cryptcrro`` package.
-
+In this case, all modules are installed under the ``Crypto`` package.
+   
 ``Cryptcrro`` includes both asymetric and symetric encryption, for encryption the protocols is asymetric ECIES + AES-128 or RSA + AES-128, for signing the protocols is ECDSA or RSA.
 
 All Elliptic curve operation is done with the Secp256k1 curve.
