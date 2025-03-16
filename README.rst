@@ -22,6 +22,8 @@ All Elliptic curve operation is done with the Secp256k1 curve.
 
 *It is CTR encryption mode but using Sha256 instead of AES or other protocols. 
 
+Cryptcrro provide high level recipe through the ''crro'' module
+
 For example, symetric encryption can be done like that:
 
 .. code-block:: pycon
