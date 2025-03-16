@@ -9,12 +9,16 @@ You can install it with::
 
 In this case, all modules are installed under the ``cryptcrro`` package.
    
-``Cryptcrro`` includes both asymetric and symetric encryption, for encryption the protocols is asymetric ECIES + AES-128 or RSA + AES-128, for signing the protocols is ECDSA or RSA.
+``Cryptcrro`` includes both asymetric and symetric encryption, for encryption the protocols is asymetric ECIES + Chacha20 or RSA + Chacha20, for signing the protocols is ECDSA or RSA.
 
 All Elliptic curve operation is done with the Secp256k1 curve.
 
-``Cryptcrro`` also provide a symmetric encryption called sha256_CTR, it is basically a AES-CTR encryption mode but using Sha256 instead of AES. (I know it seems weird, but if you are perplexed about encryption with a hashing function pls check the code).
+``Cryptcrro`` also provide symmetric encryption protocols:
+       -AES-256_CTR
+       -ChaCha20
+       -Sha256_CTR*
 
+*It is CTR encryption mode but using Sha256 instead of AES or other protocols. 
 
 For example, symetric encryption can be done like that:
 
