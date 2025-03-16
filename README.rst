@@ -15,7 +15,9 @@ All Elliptic curve operation is done with the Secp256k1 curve.
 
 ``Cryptcrro`` also provide symmetric encryption protocols:
        -AES-256_CTR
+
        -ChaCha20
+
        -Sha256_CTR*
 
 *It is CTR encryption mode but using Sha256 instead of AES or other protocols. 
