@@ -1,7 +1,7 @@
 Cryptcrro
 =================
 
-``Cryptcrro`` is a python cryptographc library.
+``Cryptcrro`` is a python cryptographic library.
 
 You can install it with::
 
