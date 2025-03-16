@@ -13,7 +13,7 @@ In this case, all modules are installed under the ``cryptcrro`` package.
 
 All Elliptic curve operation is done with the Secp256k1 curve.
 
-``Cryptcrro`` also provide symmetric encryption protocols:
+``Cryptcrro`` also provide symmetric encryption protocols as:
        -AES-256_CTR
 
        -ChaCha20
