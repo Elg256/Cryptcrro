@@ -1,0 +1,19 @@
+[build-system]
+requires = ["maturin>=1.0"]
+build-backend = "maturin"
+
+[project]
+name = "cryptcrro"
+version = "0.1.0"
+description = "A cryptography librairy"
+authors = [{ name = "The Crro Project", email = "elgremonter@gmail.com" }]
+license = "MIT"
+readme = "README.rst"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Rust",
+]
+
+[tool.maturin]
+bindings = "pyo3"
+module-name = "cryptcrro._rust"
