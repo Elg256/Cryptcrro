@@ -1,8 +1,9 @@
+
 use rand::rngs::OsRng;
 use rand::RngCore;
-use hex;
 use hex::{encode, decode};
-use pyo3::pyfunction;
+use pyo3::{pyfunction, pymethods, pyclass, PyResult, Python};
+use pyo3::types::PyBytes;
 
 
 fn prepend_nonce(vec: &mut Vec<u8>, nonce: [u32; 2]) {
@@ -107,13 +108,6 @@ fn u8_to_u32_array_le(bytes: [u8; 32]) -> [u32; 8] {
     result
 }
 
-fn array_to_hex_string(array: [[u8; 4]; 4]) -> String {
-    array
-        .iter()
-        .flat_map(|row| row.iter())
-        .map(|byte| format!("{:02x}", byte))
-        .collect()
-}
 
 #[pyfunction]
 pub fn chacha20_encrypt(key: &[u8], plaintext: &[u8]) -> Vec<u8> {
@@ -136,4 +130,100 @@ pub fn chacha20_decrypt(key: &[u8], ciphertext: &[u8]) -> Vec<u8> {
     ];
     let plaintext = _encrypt(u8_to_u32_array_le(array_key), nonce, &ciphertext[8..]);
     return plaintext;
+}
+
+#[pyclass]
+pub struct ChaCha20{
+    key : [u32; 8],
+    counter: u64,
+    nonce : [u32; 2],
+
+}
+
+#[pymethods]
+impl ChaCha20 {
+    #[new]
+    pub fn new(key: &[u8]) -> PyResult<Self> {
+        if key.len() != 32 {
+            return Err(pyo3::exceptions::PyValueError::new_err("Key must be 32 bytes."));
+        }
+        let mut array_key = [0u8; 32];
+        array_key.copy_from_slice(key);
+        Ok(Self {
+            key: u8_to_u32_array_le(array_key),
+            counter: 0,
+            nonce: [OsRng.next_u32(), OsRng.next_u32()],
+        })
+    }
+
+    pub fn get_nonce<'py>(&self, py: Python<'py>) -> &'py PyBytes{
+        let mut bytes = [0u8; 8];
+        bytes[..4].copy_from_slice(&self.nonce[0].to_le_bytes());
+        bytes[4..].copy_from_slice(&self.nonce[1].to_le_bytes());
+        PyBytes::new(py, &bytes)
+    }
+
+    pub fn set_nonce(&mut self, nonce_bytes: &[u8]) -> PyResult<()> {
+        if nonce_bytes.len() != 8 {
+            return Err(pyo3::exceptions::PyValueError::new_err("Nonce must be 8 bytes."));
+        }
+        self.nonce[0] = u32::from_le_bytes(nonce_bytes[0..4].try_into().unwrap());
+        self.nonce[1] = u32::from_le_bytes(nonce_bytes[4..8].try_into().unwrap());
+        Ok(())
+    }
+
+    pub fn encrypt<'py>(&mut self, py: Python<'py>, plaintext: &[u8]) -> &'py PyBytes {
+        let mut ciphertext = _encrypt(self.key, self.nonce, plaintext);
+        prepend_nonce(&mut ciphertext, self.nonce);
+        PyBytes::new(py, &ciphertext)
+    }
+
+    pub fn decrypt<'py>(&mut self, py: Python<'py>, plaintext: &[u8]) -> &'py PyBytes {
+        let nonce = [
+            u32::from_le_bytes(plaintext[0..4].try_into().unwrap()),
+            u32::from_le_bytes(plaintext[4..8].try_into().unwrap()),
+        ];
+        self.nonce = nonce;
+        let plaintext = _encrypt(self.key, self.nonce, &plaintext[8..]);
+        PyBytes::new(py, &plaintext)
+    }
+
+    pub fn encrypt_chunk<'py>(&mut self, py: Python<'py>, chunk: &[u8]) -> &'py PyBytes {
+        let len = chunk.len();
+        let mut ciphertext = vec![0u8; len];
+        let num_blocks = (len + 63) / 64;
+        let mut keystream;
+
+        for i in 0..num_blocks {
+            keystream = chacha20_block(self.key, self.counter, self.nonce);
+
+            let start = i * 64;
+            let end = (start + 64).min(len);
+
+            for j in start..end {
+                ciphertext[j] = chunk[j] ^ keystream[j - start];
+
+            }
+            self.counter += 1;
+        }
+
+        PyBytes::new(py, &ciphertext)
+    }
+
+    pub fn decrypt_chunk<'py>(&mut self, py: Python<'py>, chunk: &[u8]) -> &'py PyBytes {
+        self.encrypt_chunk(py, chunk)
+
+
+    }
+
+}
+
+fn u32_array_to_u8_array(input: [u32; 2]) -> [u8; 8] {
+    let bytes1 = input[0].to_le_bytes();
+    let bytes2 = input[1].to_le_bytes();
+
+    [
+        bytes1[0], bytes1[1], bytes1[2], bytes1[3],
+        bytes2[0], bytes2[1], bytes2[2], bytes2[3],
+    ]
 }
