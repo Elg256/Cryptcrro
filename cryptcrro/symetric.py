@@ -11,6 +11,8 @@ from cryptcrro.sha256_ctr import generate_key as sha256_generate_key
 from cryptcrro.sha256_ctr import encrypt as sha256_ctr_encrypt
 from cryptcrro.sha256_ctr import decrypt as sha256_ctr_decrypt
 
+from cryptcrro._rust import ChaCha20
+
 
 class crro:
 
@@ -62,19 +64,5 @@ class AES256_Ctr:
         encrypted_message = base64.urlsafe_b64decode(encrypted_message)
         decrypted_message = aes256_ctr_decrypt(key, encrypted_message)
         return decrypted_message
-
-class ChaCha20:
-
-    @staticmethod
-    def generate_key() -> bytes:
-        return os.urandom(32)
-
-    @staticmethod
-    def encrypt(key: bytes, message: bytes, padding = True) -> bytes:
-        encrypted_message = chacha20_encrypt(key, message)
-        return encrypted_message
-
-    @staticmethod
-    def decrypt(key: bytes, encrypted_message: bytes, padding = True) -> bytes:
-        decrypted_message = chacha20_decrypt(key, encrypted_message)
-        return decrypted_message
+    
+    
