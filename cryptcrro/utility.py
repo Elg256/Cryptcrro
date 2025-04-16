@@ -195,30 +195,133 @@ def extract_message_and_signature_rsa(signed_message):
 
     return signature, message
 
-def extract_message_and_signature_old(signed_message):
 
-    start_marker = "---BEGIN SIGNED CRRO MESSAGE---"
-    end_marker = "---Start Signature---"
-    if start_marker in signed_message and end_marker in signed_message:
-        start_index = signed_message.index(start_marker) + len(start_marker)
-        end_index = signed_message.index(end_marker)
-        message = signed_message[start_index:end_index].strip()
+def parse_crro_private_block(block: bytes):
+    block = block.split(b"\n")
+    block = base64.urlsafe_b64decode(b"".join(block[1:-1]))
+    if block.startswith(b"ECC"):
+        block = block.replace(b"ECC 256 bits\n", b"")
+        x = int.from_bytes(block[:32])
+        y = int.from_bytes(block[32:64])
+        private_key = int.from_bytes(block[64:])
+        public_key = x, y
+        key_type = "ECC 256 bits"
+        return private_key, public_key, key_type
 
-    start_marker = "---Start Signature---"
-    end_marker = "---End Signature---"
+    elif block.startswith(b"RSA"):
+        # Format: [RSA size] [size_n] [size_d] [e] [n] [d]
 
-    start_index = signed_message.index(start_marker) + len(start_marker)
-    end_index = signed_message.index(end_marker)
-    cle_sign = signed_message[start_index:end_index].strip()
-    cle_sign = cle_sign.replace(" ", "").replace("\n", "")
+        key_type = block[:13].decode("utf-8")
 
-    signature = base64.urlsafe_b64decode(cle_sign).decode('utf-8').replace(" ", "")
+        size_n = int.from_bytes(block[13:15], byteorder="big")
+        size_d = int.from_bytes(block[15:17], byteorder="big")
 
-    signature = signature.replace(" ", "").replace("(", "").replace(")", "").split(",")
+        e = int.from_bytes(block[17:20], byteorder="big")
+        n = int.from_bytes(block[20:20 + size_n], byteorder="big")
+        d = int.from_bytes(block[20 + size_n:20 + size_n + size_d], byteorder="big")
 
-    signature = tuple(int(signature) for signature in signature)
+        public_key = (e, n)
+        private_key = (d, n)
 
-    return signature, message
+        return private_key, public_key, key_type
+    else:
+        raise ValueError("Key Format isn't repected")
+
+
+def parse_crro_public_block(block: bytes):
+    block = block.split(b"\n")
+    block = base64.urlsafe_b64decode(b"".join(block[1:-1]))
+    if block.startswith(b"ECC"):
+        block = block.replace(b"ECC 256 bits\n", b"")
+        x = int.from_bytes(block[:32], byteorder="big")
+        y = int.from_bytes(block[32:], byteorder="big")
+        public_key = x, y
+        key_type = "ECC 256 bits"
+        return public_key, key_type
+
+
+    elif block.startswith(b"RSA"):
+        # Format: [RSA size] [size_n] [e] [n]
+
+        key_type = str(block[:13])
+        size_n = int.from_bytes(block[13:15], byteorder="big")
+
+        e = int.from_bytes(block[15:18], byteorder="big")
+        n = int.from_bytes(block[18:20 + size_n], byteorder="big")
+
+        public_key = (e, n)
+
+        return public_key, key_type
+    else:
+        raise ValueError("Key Format isn't repected")
+
+
+def create_crro_block(public_key: tuple, private_key=None):
+    if int(public_key[0]) == 65537: # mean a rsa public key
+        if private_key:
+            e, n = public_key
+            e_int, n_int = int(e), int(n)
+            e_bytes = int(public_key[0]).to_bytes(3, byteorder="big")
+            size_n = (n_int.bit_length() + 7) // 8
+            n_bytes = int(public_key[1]).to_bytes((size_n), byteorder="big")
+
+            d, _ = private_key
+            size_d = (int(d).bit_length() + 7) // 8
+            d_bytes = int(private_key[0]).to_bytes(size_d, byteorder="big")
+
+            rsa_sizes = [1024, 2048, 3072, 4096]
+            rsa_bits = min(rsa_sizes, key=lambda x: abs(x - n_int.bit_length()))
+
+            # Format: [RSA size] [size_n] [size_d] [e] [n] [d]
+
+            header = b"RSA " + str(rsa_bits).encode() + b" bits"
+            metadata = size_n.to_bytes(2, byteorder="big") + size_d.to_bytes(2, byteorder="big")
+
+            b64_key_pair = base64.urlsafe_b64encode(header + metadata + e_bytes + n_bytes + d_bytes)
+
+            block = b"-----BEGIN CRRO PRIVATE KEY BLOCK-----\n" + b64_key_pair + \
+                    b"\n-----END CRRO PRIVATE KEY BLOCK-----"
+
+            return insert_newlines_with_tags(block.decode(), 64).encode()
+
+        else:
+            e, n = public_key
+            e_int, n_int = int(e), int(n)
+            e = int(public_key[0]).to_bytes(3, byteorder="big")
+            real_size_n = (n_int.bit_length() + 7) // 8
+            n = int(public_key[1]).to_bytes(real_size_n, byteorder="big")
+
+            rsa_sizes = [1024, 2048, 3072, 4096]
+            rsa_bits = min(rsa_sizes, key=lambda x: abs(x - n_int.bit_length()))
+
+            b64_key_pair = base64.urlsafe_b64encode(b"RSA " + str(rsa_bits).encode() + b" bits\nn=" +
+                                                    str(real_size_n).encode() + b"bits\n" + e + n)
+
+            block = b"-----BEGIN CRRO PUBLIC KEY BLOCK-----\n" + b64_key_pair + \
+                    b"\n-----END CRRO PUBLIC KEY BLOCK-----"
+
+            return insert_newlines_with_tags(block.decode(), 64).encode()
+
+    else:
+        if private_key:
+            x, y = int(public_key[0]).to_bytes(32, byteorder="big"), int(public_key[1]).to_bytes(32, byteorder="big")
+            k = int(private_key).to_bytes(32, byteorder="big")
+            print(x, y)
+            print(k)
+            b64_key_pair = base64.urlsafe_b64encode(b"ECC 256 bits\n" + x + y + k)
+            block = b"-----BEGIN CRRO PRIVATE KEY BLOCK-----\n" + b64_key_pair + \
+                    b"\n-----END CRRO PRIVATE KEY BLOCK-----"
+
+            return insert_newlines_with_tags(block.decode(), 64).encode()
+        else:
+            x, y = int(public_key[0]).to_bytes(32, byteorder="big"), int(public_key[1]).to_bytes(32, byteorder="big")
+            b64_public_key = base64.urlsafe_b64encode(b"ECC 256 bits\n" + x + y)
+            block = b"-----BEGIN CRRO PUBLIC KEY BLOCK-----\n" + b64_public_key + \
+                    b"\n-----END CRRO PUBLIC KEY BLOCK-----"
+
+            return insert_newlines_with_tags(block.decode(), 64).encode()
+
+
 
 
 def int_to_base32(num):
