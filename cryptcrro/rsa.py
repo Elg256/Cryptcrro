@@ -7,7 +7,7 @@ from cryptcrro.utility import insert_newlines_with_tags
 from cryptcrro.secp256k1 import gx, gy
 from cryptcrro.arith import next_prime
 
-import rust_cryptcrro
+from cryptcrro.symetric import crro as scrro
 
 
 generator_point = gx , gy
@@ -40,12 +40,11 @@ def generate_keys(key_size=2048):
     return private_key, public_key
 
 
-def encrypt_aes256(symetric_key, message):
-    return bytes.fromhex(rust_cryptcrro.aes256_ctr_encrypt(symetric_key, message.hex()))
+def encrypt_symetric(symetric_key, message) -> bytes:
+    return scrro.encrypt(symetric_key, message)
 
-def decrypt_aes256(symetric_key, encrypted_message):
-    return bytes.fromhex(rust_cryptcrro.aes256_ctr_decrypt(symetric_key,
-                                                           base64.urlsafe_b64decode(encrypted_message).hex()))
+def decrypt_symetric(symetric_key, encrypted_message) -> bytes:
+    return scrro.decrypt(symetric_key, encrypted_message)
 
 def encrypt_message(public_key, message):
 
@@ -57,7 +56,7 @@ def encrypt_message(public_key, message):
     encrypted_key = pow(int_symetric_key, e, n)
     encrypted_key = base64.urlsafe_b64encode((encrypted_key.to_bytes((encrypted_key.bit_length() + 7) //8, byteorder='big'))).decode()
  
-    encrypted_message = base64.urlsafe_b64encode(encrypt_aes256(symetric_key.hex() ,message))
+    encrypted_message = encrypt_symetric(symetric_key ,message)
 
     return encrypted_key, encrypted_message
 
@@ -98,7 +97,7 @@ def decrypt_message(private_key, encrypted_message):
 
     symetric_key = symetric_key.to_bytes(32, byteorder='big')
 
-    decrypted_message = decrypt_aes256(symetric_key.hex(), encrypted_message)
+    decrypted_message = decrypt_symetric(symetric_key, encrypted_message)
 
     return decrypted_message
 
