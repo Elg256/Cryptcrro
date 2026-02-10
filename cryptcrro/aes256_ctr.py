@@ -25,6 +25,7 @@ def decrypt(key: bytes, message: bytes) -> bytes:
     if hmac != calc_hmac:
         raise ValueError("Invalid HMAC: verification failed")
 
-    plaintext = bytes.fromhex(rust_cryptcrro.aes256_ctr_decrypt(key.hex(), ciphertext.hex()))
+    plaintext = bytes.fromhex(_rust.aes256_ctr_decrypt(key.hex(), ciphertext.hex()))
 
     return plaintext
+
