@@ -14,11 +14,12 @@ def generate_public_key(private_key:int):
     return _rust.generate_public_key(int(private_key))
 
 
-def encrypt_symetric(symetric_key, message) -> str:
-    return scrro.encrypt(symetric_key, message).decode()
+def encrypt_symetric(symetric_key, message) -> bytes:
+    return scrro.encrypt(symetric_key, message)
+
 
 def decrypt_symetric(symetric_key, encrypted_message) -> bytes:
-    return scrro.decrypt(symetric_key, encrypted_message)
+    return scrro.decrypt(symetric_key, base64.urlsafe_b64decode(encrypted_message))
 
 def encrypt_message(public_key, message):
 
@@ -29,8 +30,9 @@ def encrypt_message(public_key, message):
     shared_secret = _rust.ecies_mul_points(random_int, public_key)
 
     gx_shared, gy_shared = shared_secret
+    gx_shared = str(gx_shared)
 
-    symetric_key = hashlib.sha256(gx_shared.to_bytes(32, 'big')).digest()
+    symetric_key = hashlib.sha256(gx_shared.encode('utf-8')).digest()
 
     encrypted_message = encrypt_symetric(symetric_key ,message)
 
@@ -74,10 +76,10 @@ def decrypt_message(private_key, encrypted_message):
     shared_secret = _rust.ecies_mul_points(private_key, random_int_on_curve)
 
     gx_shared, gy_shared = shared_secret
+    gx_shared = str(gx_shared)
 
-    symetric_key = hashlib.sha256(gx_shared.to_bytes(32, 'big')).digest()
+    symetric_key = hashlib.sha256(gx_shared.encode('utf-8')).digest()
 
     decrypted_message = decrypt_symetric(symetric_key, encrypted_message)
 
     return decrypted_message
-
