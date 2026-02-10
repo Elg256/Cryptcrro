@@ -118,3 +118,4 @@ if text == message:
     print(f"AES256_Ctr.encrypt/decrypt       Ok  {time.time() - start_time}")
 else:
     print(f"AES256_Ctr.encrypt/decrypt       Failed")
+
