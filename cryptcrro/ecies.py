@@ -3,7 +3,7 @@ import base64
 import hashlib
 from cryptcrro.utility import insert_newlines_with_tags
 from cryptcrro import _rust
-from cryptcrro.symetric import crro as scrro
+from cryptcrro.symmetric import crro as scrro
 
 generator_point = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798, 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
 
@@ -80,3 +80,4 @@ def decrypt_message(private_key, encrypted_message):
     decrypted_message = decrypt_symetric(symetric_key, encrypted_message)
 
     return decrypted_message
+
