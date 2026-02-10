@@ -7,7 +7,7 @@ from cryptcrro.utility import insert_newlines_with_tags
 from cryptcrro.secp256k1 import gx, gy
 from cryptcrro.arith import next_prime
 
-from cryptcrro.symetric import crro as scrro
+from cryptcrro.symmetric import crro as scrro
 
 
 generator_point = gx , gy
@@ -126,3 +126,4 @@ def check_sig(public_key, signature, message):
         return True
     else:
         return False
+
