@@ -1,11 +1,12 @@
 import os
 
-from cryptcrro.asymetric import crro
-from cryptcrro.asymetric import rsa
-from cryptcrro.symetric import crro as scrro
+from cryptcrro.asymmetric import crro
+from cryptcrro.asymmetric import rsa
+from cryptcrro.symmetric import crro as scrro
 import time
 
-from cryptcrro.symetric import Sha256_Ctr
+from cryptcrro.symmetric import Sha256_Ctr
+from cryptcrro.symmetric import AES256_Ctr
 
 message = b"""Information can leak from a system through measurement of the time it takes to respond to certain queries. How much this information can help an attacker depends on many variables: cryptographic system design, the CPU running the system, the algorithms used, assorted implementation details, timing attack countermeasures, the accuracy of the timing measurements, etc. Timing attacks can be applied to any algorithm that has data-dependent timing variation. Removing timing-dependencies is difficult in some algorithms that use low-level operations that frequently exhibit varied execution time."""
 
@@ -104,3 +105,16 @@ if text == message:
     print(f"Sha256_Ctr.encrypt/decrypt       Ok  {time.time() - start_time}")
 else:
     print(f"Sha256_Ctr.encrypt/decrypt       Failed")
+
+
+
+key = AES256_Ctr.generate_key()
+start_time = time.time()
+ciphertext = AES256_Ctr.encrypt(key, message)
+
+text = AES256_Ctr.decrypt(key, ciphertext)
+
+if text == message:
+    print(f"AES256_Ctr.encrypt/decrypt       Ok  {time.time() - start_time}")
+else:
+    print(f"AES256_Ctr.encrypt/decrypt       Failed")
