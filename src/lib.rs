@@ -20,5 +20,8 @@ fn _rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ecdsa::create_ecdsa_sig, m)?)?;
     m.add_function(wrap_pyfunction!(ecdsa::check_sig, m)?)?;
     m.add_function(wrap_pyfunction!(ecies::ecies_mul_points, m)?)?;
+
+    m.add_class::<chacha20::ChaCha20>()?;
     Ok(())
 }
+
